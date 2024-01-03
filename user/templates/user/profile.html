@@ -1,0 +1,15 @@
+{% extends "base.html" %} 
+
+{% block head_title %}Profile {% endblock%}
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 col-md-8 col-sm-12 mx-auto">
+        <h2>hello {{request.user.first_name}} {{request.user.last_name}}! welcome to profile</h2>
+        <h5>Account Number : {{request.user.account.account_no}}</h5>
+        <h6>Balance : {{request.user.account.balance}}</h6>
+    </div>
+    <div  class="col-lg-4 col-md-4 col-sm-12 mx-auto">
+        <button class="btn btn-info"><a href="{% url 'update' %}">Edit Profile</a></button>
+    </div>
+</div>
+{% endblock %}
