@@ -1,14 +1,17 @@
-from django.shortcuts import render,redirect
+from typing import Any
+from django.shortcuts import render,redirect,get_object_or_404
 from django.views import View
 from django.urls import reverse_lazy
-from. models import BorrowBook
+from. models import BorrowBook,Review
 from books.models import Book
 from django.contrib import messages
 from django.views.generic import FormView,TemplateView
 from django.contrib.auth import login,logout
 from django.contrib.auth.views import LoginView, LogoutView
-from. forms import RegistrationsForm,UpdateUserform,DepositForm
-from decimal import Decimal, ROUND_DOWN
+from. forms import RegistrationsForm,UpdateUserform,DepositForm,BookReviewForm
+from decimal import Decimal
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 class UserCreateView(FormView):
@@ -35,13 +38,13 @@ class UserLoginView(LoginView):
         context['type']='Login'
         return context
     
-class UserLogoutView(LogoutView):
+class UserLogoutView(LoginRequiredMixin,LogoutView):
     def get_success_url(self):
         if self.request.user.is_authenticated:
             logout(self.request)
         return reverse_lazy('home')
     
-class UserAcountUpdateView(View):
+class UserAcountUpdateView(LoginRequiredMixin,View):
     template_name='user/signup.html'
 
     def get(self,request):
@@ -62,11 +65,16 @@ class UserAcountUpdateView(View):
     
 
 
-class ProfileView(TemplateView):
+class ProfileView(LoginRequiredMixin,TemplateView):
     template_name='user/profile.html'
 
+    def get_context_data(self, **kwargs):
+        context=super().get_context_data(**kwargs)
+        context['data']=BorrowBook.objects.filter(user=self.request.user)
+        return context
 
-class DepositView(View):
+
+class DepositView(LoginRequiredMixin,View):
     template_name='user/deposite.html'
     form_class = DepositForm
     # success_url =reverse_lazy('profile')
@@ -86,56 +94,105 @@ class DepositView(View):
             )
             return redirect('profile')
         return render(request,self.template_name,{'form':form})
-     
+
+@login_required     
 def book_borrow(request,id):
     book=Book.objects.get(pk=id)
     user_balance = request.user.account.balance
-    
-    print(book.book_price)
-    print(book.book_quantity)
-    print(request.user.account.balance)
-
+    price=book.book_price
+    num_1=Decimal(user_balance)
+    num_2=Decimal(price)
+    num_3=num_1-num_2
 
     if book.book_quantity<1:
         messages.warning(request,'No stocks available')
         return redirect('profile')
-    if user_balance>=book.book_price:
-        af_balance=user_balance - book.book_price
-      
-        borrow=BorrowBook.objects.create(
-            user=request.user,
-            book_name=book.book_name,
-            book_price=book.book_price,
-            balance_A_B_Book=af_balance
-        )
-        print(borrow)
-        book.book_quantity-=1
-        book.save()
-        # borrow.save()
-        return redirect('profile')
     else:
-        messages.warning(request,'Insufficient balance')
+        if user_balance>=book.book_price:
+            # af_balance=user_balance - book.book_price
+        
+            borrow=BorrowBook.objects.create(
+                user=request.user,
+                book_id=id,
+                book_name=book.book_name,
+                book_price=book.book_price,
+                balance_A_B_Book=num_3,
+            )
+            
+            book.book_quantity-=1
+            request.user.account.balance=num_3
+            request.user.account.save(
+                update_fields=['balance']
+            )
+            book.save()
+            borrow.save()
+            return redirect('profile')
+        else:
+            messages.warning(request,'Insufficient balance')
+        return redirect('profile')
+
+@login_required
+def Return_Book(request, id):
+    book = get_object_or_404(Book, pk=id)
+
+    # Find the BorrowBook instance for this user and book
+    try:
+        book_returned = BorrowBook.objects.get(book_id=id, user=request.user, returned=False)
+    except BorrowBook.DoesNotExist:
+        # Handle the case where no matching record is found
+        # Redirect to an error page or show a message
+        return redirect('profile')
+
+    # Proceed with returning the book
+    account = request.user.account
+    account.balance += book.book_price
+    book.book_quantity += 1
+    book_returned.returned = True
+
+    book.save(update_fields=['book_quantity'])
+    account.save(update_fields=['balance'])
+    book_returned.save(update_fields=['returned'])
+
     return redirect('profile')
 
-# def book_borrow(request,id):
+# @login_required
+# def Return_Book(request,id):
 #     book=Book.objects.get(pk=id)
-#     book.book_quantity-=1
-#     aft_balance=request.user.account.balance - book.book_price
-#     if  book.car_quantity<1:
-#         messages.warning(request,'The Car is out of stock')
-#     else:
-#         borrowed_book=BorrowBook(
-#             user= request.user,
-#             # car_image=car.car_image,
-#             book_name=book.book_name,
-#             book_price=book.car_price,
-#             balance_A_B_Book=aft_balance,
-#             # car_quantity=car.car_quantity,
-#             # car_brand_name=car.car_brand_name
-#         )
-        
-#         book.save()
-#         borrowed_book.save()
+#     book_returned=BorrowBook.objects.get(pk=id)
+#     account=request.user.account
+#     account.balance+=book.book_price
+#     book.book_quantity+=1
+#     book_returned.returned=True
+#     book.save(
+#         update_fields=['book_quantity']
+#     )
+#     account.save(
+#         update_fields=['balance']
+#     )
+#     book_returned.save(
+#         update_fields=['returned']
+#     )
+#     return redirect('profile')
 
-#     return redirect('profile')   
+@login_required
+def Book_review(request,id):
+    book=Book.objects.get(pk=id)
+    if request.method == 'POST':
+        form=BookReviewForm(request.POST)
+        if form.is_valid():
+            text=form.cleaned_data['body']
+            star=form.cleaned_data['star']
+            review=Review.objects.create(
+                book=book,
+                name=request.user.first_name,
+                body=text,
+                star=star,
+            )
+            review.save()
+            return redirect('profile')
+    else:
+        form=BookReviewForm()
+    return render(request,'user/signup.html',{'form':form,'type':'Review'})
+
+
    

@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-from. const import GENDER_TYPE
+from books.models import Book
+from. const import GENDER_TYPE,STAR
 
 # Create your models here.
 class UserAccount(models.Model):
@@ -23,10 +24,23 @@ class UserAddress(models.Model):
         return str(self.user.email)
     
 class BorrowBook(models.Model):
-    user=models.ForeignKey(User, related_name="book", on_delete=models.CASCADE)
+    user=models.ForeignKey(User, related_name="user_1", on_delete=models.CASCADE)
+    book_id=models.IntegerField(null=True, blank=True)
     book_name=models.CharField(max_length=100)
-    book_price=models.DecimalField(max_digits=4, decimal_places=2,null=True, blank=True)
-    balance_A_B_Book=models.DecimalField(max_digits=4, decimal_places=2,null=True, blank=True)
+    book_price=models.DecimalField(max_digits=8, decimal_places=2,null=True, blank=True)
+    balance_A_B_Book=models.DecimalField(max_digits=10, decimal_places=2,null=True, blank=True)
     borrow_date=models.DateField(auto_now_add=True)
-    
+    returned = models.BooleanField(default=False, blank=True,null=True)
+    def __str__(self):
+        return self.book_name
+
+class Review(models.Model):
+    book=models.ForeignKey(Book, related_name="comment", on_delete=models.CASCADE)
+    name=models.CharField(max_length=50)
+    email=models.EmailField()
+    body=models.TextField(null=True, blank=True)
+    star=models.CharField(max_length=50,choices=STAR,null=True,blank=True)
+    time=models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f'Comment by{self.name}'
 

@@ -2,8 +2,9 @@ from typing import Any
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from. const import GENDER_TYPE
-from. models import UserAccount,UserAddress
+from. const import GENDER_TYPE,STAR
+from. models import UserAccount,Review,UserAddress
+
 
 class RegistrationsForm(UserCreationForm):
     birth_date=forms.DateField(widget=forms.DateInput(attrs={'type':'date'}))
@@ -90,5 +91,11 @@ class UpdateUserform(forms.ModelForm):
 
 class DepositForm(forms.Form):
     amount=forms.DecimalField()
+    def clean(self):
+        return super().clean()
+    
+class BookReviewForm(forms.Form):
+    body=forms.CharField(widget=forms.TextInput)
+    star=forms.ChoiceField(choices=STAR)
     def clean(self):
         return super().clean()

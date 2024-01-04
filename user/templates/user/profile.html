@@ -12,4 +12,45 @@
         <button class="btn btn-info"><a href="{% url 'update' %}">Edit Profile</a></button>
     </div>
 </div>
+
+<br>
+<br>
+<br>
+
+<table class="table table-bordered table-hover">
+    <thead>
+      <tr>
+        <th scope="col">Id</th>
+        <th scope="col">Book Name</th>
+        <th scope="col">Book Price</th>
+        <th scope="col">Balance After Borrrow Book</th>
+        <th scope="col">Purse Date</th>
+        <th scope="col">Action</th>
+        <th scope="col">Review</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% if data %}
+        {% for b in data %}
+      <tr>
+        <th scope="row">{{b.id}}</th>
+        <td>{{b.book_name}}</td>
+        <td>{{b.book_price}}</td>
+        <td>{{b.balance_A_B_Book}}</td>
+        <td>{{b.borrow_date}}</td>
+        <td>
+        {% if not b.returned %}
+           <a href="{% url 'return' b.book_id %}"  class="btn btn-info">Return Book</a>
+        {% else %}
+            <button class="btn btn-secondary" disabled>Book Returned</button>
+        {% endif %}
+    n  </td>
+        <td><a href="{% url 'review' b.book_id %}"  class="btn btn-info">Review</a></td>
+       
+      </tr>
+      {% endfor %}
+      {% endif %}
+   
+    </tbody>
+  </table>
 {% endblock %}
