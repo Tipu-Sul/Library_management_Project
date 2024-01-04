@@ -102,7 +102,7 @@ WSGI_APPLICATION = 'library_management_project.wsgi.application'
 #     }
 # }
 
-
+CSRF_TRUSTED_ORIGINS = ['https://library-management-project.onrender.com','https://*.127.0.0.1']
 
 DATABASES = {
     'default': dj_database_url.config(
