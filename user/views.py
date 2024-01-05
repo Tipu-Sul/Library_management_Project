@@ -43,10 +43,9 @@ class UserLoginView(LoginView):
 class UserLogoutView(LoginRequiredMixin,LogoutView):
     def get_success_url(self):
         if self.request.user.is_authenticated:
-
-            messages.success(self.request,'Logged out successfully')
             logout(self.request)
-        return reverse_lazy('home')
+            messages.success(self.request,'Logged out successfully')
+        return reverse_lazy('login')
     
 class UserAcountUpdateView(LoginRequiredMixin,View):
     template_name='user/signup.html'
