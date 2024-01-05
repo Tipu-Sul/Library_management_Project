@@ -16,7 +16,7 @@
 <br>
 <br>
 <br>
-
+{% if data %}
 <table class="table table-bordered table-hover">
     <thead>
       <tr>
@@ -30,7 +30,7 @@
       </tr>
     </thead>
     <tbody>
-        {% if data %}
+        
         {% for b in data %}
       <tr>
         <th scope="row">{{b.id}}</th>

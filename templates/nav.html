@@ -1,8 +1,8 @@
 
 
-<nav class="navbar navbar-expand-md bg-body-tertiary">
+<nav class="navbar navbar-expand-md"  style="background-color: rgb(237, 196, 244);">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">Navbar</a>
+      <a class="navbar-brand" href="#">OTX Library</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -21,7 +21,7 @@
         </ul>
         <form class="d-flex">
         {% if request.user.is_authenticated %}
-          <button class="btn btn-outline-success mx-3" ><a href="{% url 'profile' %}">Profile</a></button>
+          <button class="btn btn-outline-success mx-3 text-dark" ><a href="{% url 'profile' %}">Profile</a></button>
           <button class="btn btn-outline-success" ><a href="{% url 'logout' %}">Logout</a></button>
         {% else %}
           <button class="btn btn-outline-success mx-3"><a href="{% url 'login' %}">Login</a></button>

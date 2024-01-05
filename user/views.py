@@ -20,6 +20,7 @@ class UserCreateView(FormView):
     success_url=reverse_lazy('profile')
     def form_valid(self, form):
         user=form.save()
+        messages.success(self.request, "User created successfully")
         login(self.request,user)       
         return super().form_valid(form)
     
@@ -31,6 +32,7 @@ class UserCreateView(FormView):
 class UserLoginView(LoginView):
     template_name='user/signup.html'
     def get_success_url(self):
+        messages.success(self.request,'Logged in successfully')
         return reverse_lazy('profile')
     
     def get_context_data(self, **kwargs):
@@ -41,6 +43,8 @@ class UserLoginView(LoginView):
 class UserLogoutView(LoginRequiredMixin,LogoutView):
     def get_success_url(self):
         if self.request.user.is_authenticated:
+
+            messages.success(self.request,'Logged out successfully')
             logout(self.request)
         return reverse_lazy('home')
     
@@ -55,6 +59,7 @@ class UserAcountUpdateView(LoginRequiredMixin,View):
         form=UpdateUserform(request.POST,instance=request.user)
         if form.is_valid():
             form.save()
+            messages.success(self.request,'Account updeted successfully')
             return redirect('profile')
         return render(request,self.template_name,{'form':form})
     
@@ -92,6 +97,7 @@ class DepositView(LoginRequiredMixin,View):
             account.save(
             update_fields=['balance']
             )
+            messages.success(self.request,'Deposit successfull')
             return redirect('profile')
         return render(request,self.template_name,{'form':form})
 
@@ -126,6 +132,7 @@ def book_borrow(request,id):
             )
             book.save()
             borrow.save()
+            messages.success(request,'borrowed book successfully')
             return redirect('profile')
         else:
             messages.warning(request,'Insufficient balance')
@@ -152,27 +159,10 @@ def Return_Book(request, id):
     book.save(update_fields=['book_quantity'])
     account.save(update_fields=['balance'])
     book_returned.save(update_fields=['returned'])
-
+    messages.success(request,'returned book successfully')
     return redirect('profile')
 
-# @login_required
-# def Return_Book(request,id):
-#     book=Book.objects.get(pk=id)
-#     book_returned=BorrowBook.objects.get(pk=id)
-#     account=request.user.account
-#     account.balance+=book.book_price
-#     book.book_quantity+=1
-#     book_returned.returned=True
-#     book.save(
-#         update_fields=['book_quantity']
-#     )
-#     account.save(
-#         update_fields=['balance']
-#     )
-#     book_returned.save(
-#         update_fields=['returned']
-#     )
-#     return redirect('profile')
+
 
 @login_required
 def Book_review(request,id):
@@ -189,6 +179,7 @@ def Book_review(request,id):
                 star=star,
             )
             review.save()
+            messages.success(request,'Review successfull')
             return redirect('profile')
     else:
         form=BookReviewForm()

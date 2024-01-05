@@ -23,11 +23,11 @@
 </div>
 <br>
 
+{% if data %}
 <div class="card">
   <div class="card-header">
     Review
   </div>
-  {% if data %}
   {% for dt in data %}
   <div class="card-body">
     <h5 class="card-title">{{dt.name}}</h5>
@@ -36,6 +36,6 @@
     <p class="card-text">{{dt.time}}</p>
   </div>
   {% endfor %}
-  {% endif %}
 </div>
+{% endif %}
 {% endblock %}
