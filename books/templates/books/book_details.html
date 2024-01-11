@@ -1,9 +1,9 @@
 {% extends "base.html" %} {% block content %} {% load crispy_forms_tags %}
-<div class="d-flex flex-wrap">
-  <div class="card bg-success-subtle" style="width: 45%; margin: auto">
+<div class="row d-flex flex-wrap m-3 mx-auto">
+  <div class="card bg-success-subtle col-lg-5 col-md-5 col-sm-12 mx-auto mb-3" >
     <img src="{{book.book_image.url}}" class="card-img-top p-2" alt="..."style="height:400px;" />
   </div>
-  <div class="card bg-success-subtle p-5" style="width: 45%; margin: auto">
+  <div class="card bg-success-subtle col-lg-5 col-md-5 col-sm-12 mx-auto mb-3" >
     <div class="card-body">
         <h5 class="card-title">Book Name : {{book.book_name}}</h5>
         <h5 class="card-title">Book Price : {{book.book_price}}</h5>
